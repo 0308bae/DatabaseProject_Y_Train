@@ -16,7 +16,11 @@
 <%--  | traincode             |--%>
 <%--  | vehicle               |--%>
 <%--  drop down으로 insert/search, table 선택하고 버튼 눌러서 이동.--%>
-
+<%
+    if (request.getParameter("errorcode") != null && request.getParameter("errorcode").equals("1")){
+%>          <h5>잘못된 사용입니다.</h5>
+<%      }
+%>
 
 <form action="adminTable.jsp" method="post">
     <h3>테이블 선택</h3>
