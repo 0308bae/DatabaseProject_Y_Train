@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: JaeikBae
-  Date: 2022-11-28
-  Time: 오전 9:08
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page import="java.sql.*" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <html>
@@ -26,7 +19,7 @@
     PreparedStatement pstmt = null;
     ResultSet rs = null;
 
-    String query = "select id from member where id=? and pw=sha2(?, 256);";
+    String query = "select role from member where id=? and pw=sha2(?, 256);";
 
 
     try {
@@ -38,13 +31,12 @@
         rs = pstmt.executeQuery();
 
         if (rs.next()) { // correct id & pw
-            String res = rs.getString("id");
             String role = rs.getString("role");
             if (role.equals("user")) {
                 session.setAttribute("id", id);
                 response.sendRedirect("login.jsp");
             }
-            else { //admin
+            else { //if admin
                 response.sendRedirect("adminPage.jsp");
             }
         } else {

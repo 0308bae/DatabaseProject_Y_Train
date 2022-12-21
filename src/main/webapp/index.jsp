@@ -18,6 +18,9 @@
         <a href="logout.jsp">로그아웃</a>
 <%  }
 %>
+<a href="show.jsp">데이터베이스 확인하기</a><br>
+<a href="manage.jsp">역-본부 정보 확인</a><br>
+<a href="show_hq.jsp">본부 관리</a><br>
 <div>
     <h1>Form (Get 방식)</h1>
     <p>폼을 통해 데이터 전송해봅시다.</p>
@@ -65,9 +68,6 @@
         <input type="checkbox" name="register">
     </div>
     <button type="submit">전송</button><br><br>
-    <a href="show.jsp">데이터베이스 확인하기</a>
-    <a href="manage.jsp">역-본부 정보 확인</a>
-    <a href="show_hq.jsp">본부 관리</a>
 </form>
 </body>
 </html>
