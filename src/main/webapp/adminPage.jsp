@@ -18,8 +18,10 @@
 <%--  drop down으로 insert/search, table 선택하고 버튼 눌러서 이동.--%>
 <%
     if (request.getParameter("errorcode") != null && request.getParameter("errorcode").equals("1")){
-%>          <h5>잘못된 사용입니다.</h5>
-<%      }
+%>      <h5>잘못된 사용입니다.</h5>
+<%  } else if (request.getParameter("errorcode") != null && request.getParameter("errorcode").equals("2")){
+%>      <h5>외래키 정책 위반.</h5>
+<%  }
 %>
 
 <form action="adminTable.jsp" method="post">
@@ -35,6 +37,7 @@
     <label><input type="checkbox" name="table" value="traincode">traincode</label>
     <label><input type="checkbox" name="table" value="vehicle">vehicle</label>
     <br>
+    <label><input type="checkbox" name="join">Join result?</label>
     <input type="submit" value="이동하기">
     <input type="reset" value="Reset">
 </form>

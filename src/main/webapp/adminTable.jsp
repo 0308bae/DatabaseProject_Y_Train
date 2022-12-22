@@ -18,97 +18,173 @@
     Connection conn = null;
     Statement stmt = null;
     ResultSet rs = null;
-
-    String[] tables = request.getParameterValues("table");
-    if (tables.length == 0){
-        response.sendRedirect("adminPage.jsp?errorcode=1");
-    }
-    StringBuilder table = new StringBuilder();
-
-    String foreignkey_query =
-            "SELECT " +
-                    "tc.table_name, kcu.column_name, " +
-                    "kcu.referenced_table_name, kcu.referenced_column_name " +
-                    "FROM " +
-                    "information_schema.table_constraints tc " +
-                    "JOIN " +
-                    "information_schema.key_column_usage kcu " +
-                    "ON " +
-                    "tc.constraint_name = kcu.constraint_name " +
-                    "WHERE " +
-                    "constraint_type = 'FOREIGN KEY' AND tc.table_name IN (";
-    for (String t : tables){
-        table.append(t);
-        table.append(", ");
-        foreignkey_query += "\"" + t + "\", ";
-    }
-    table.delete(table.length()-2, table.length());
-    foreignkey_query = foreignkey_query.substring(0, foreignkey_query.length()-2);
-    foreignkey_query += ");";
-    System.out.println(table);
-    System.out.println(foreignkey_query);
-%>
-    <h3><%=table%></h3> 
-    <table border="1" cellpadding="3" cellspacing="2">
-<%  try {
-        Class.forName("org.mariadb.jdbc.Driver");
-        conn = DriverManager.getConnection(jdbcDriver, dbUser, dbPwd);
-        stmt = conn.createStatement();
-        rs = stmt.executeQuery(foreignkey_query);
-
-        StringBuilder query = new StringBuilder("select * from " + table + " where ");
-        while(rs.next()){
-            String name1 = rs.getString("TABLE_NAME");
-            String attr1 = rs.getString("COLUMN_NAME");
-            String name2 = rs.getString("REFERENCED_TABLE_NAME");
-            String attr2 = rs.getString("REFERENCED_COLUMN_NAME");
-            if (Arrays.asList(tables).contains(name2)){
-                query.append(name1+"."+attr1+"="+name2+"."+attr2+"  and  ");
-            }
+    try {
+        String isJoin = request.getParameter("join");
+        String[] tables = request.getParameterValues("table");
+        if (tables == null || tables.length == 0){
+            isJoin = request.getAttribute("join").toString();
+            tables = new String[]{request.getAttribute("table").toString()};
         }
-        query.delete(query.length()-7, query.length());
-        query.append(";");
-        System.out.println(query.toString());
+        if (isJoin != null){
+            StringBuilder table = new StringBuilder();
 
-        rs = stmt.executeQuery(query.toString());
-        ResultSetMetaData rsmd = rs.getMetaData();
-        int cnt = rsmd.getColumnCount();
-        int i;
-        for(i=1 ; i<=cnt ; i++){
-%>          <th><%=rsmd.getColumnName(i)%></th>
-<%      }
-        while(rs.next()){
-%>          <tr>
-<%          for(i=1 ; i<=cnt ; i++){
-%>              <td><%=rs.getString(rsmd.getColumnName(i))%></td>
-<%          }
-%>          </tr>
-<%      }
+            String foreignkey_query =
+                    "SELECT " +
+                            "tc.table_name, kcu.column_name, " +
+                            "kcu.referenced_table_name, kcu.referenced_column_name " +
+                            "FROM " +
+                            "information_schema.table_constraints tc " +
+                            "JOIN " +
+                            "information_schema.key_column_usage kcu " +
+                            "ON " +
+                            "tc.constraint_name = kcu.constraint_name " +
+                            "WHERE " +
+                            "constraint_type = 'FOREIGN KEY' AND tc.table_name IN (";
+            for (String t : tables){
+                table.append(t);
+                table.append(", ");
+                foreignkey_query += "\"" + t + "\", ";
+            }
+            table.delete(table.length()-2, table.length());
+            foreignkey_query = foreignkey_query.substring(0, foreignkey_query.length()-2);
+            foreignkey_query += ");";
 %>
-        </table>
-        <form action="tableInsert.jsp" method="post">
-<%      if(tables.length == 1){
-%>          <br>
-            <label for="table">table to insert : <%=table.toString()%></label>
-            <input type="hidden" name="table" value="<%=table.toString()%>">
-            <br>
-            <label for="id">id</label>
-            <select name="id">
-<%          rs.beforeFirst();
-            while(rs.next()){
-%>              <option><%=rs.getString(rsmd.getColumnName(1))%></option>
+            <h3>Foreign Key Information</h3>
+            <table border="1" cellpadding="3" cellspacing="2">
+<%
+            Class.forName("org.mariadb.jdbc.Driver");
+            conn = DriverManager.getConnection(jdbcDriver, dbUser, dbPwd);
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(foreignkey_query);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int cnt = rsmd.getColumnCount();
+            int i;
+            for(i=1 ; i<=cnt ; i++){
+%>              <th><%=rsmd.getColumnName(i)%></th>
 <%          }
-%>          </select>
-<%      }
-        else{
-%>          <h5>insert와 update는 1개 테이블만 선택해야 가능합니다.</h5>
-<%      }
-        for(i=2 ; i<=cnt ; i++){
-%>          <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>">
-<%      }
-%>      <br>
-        <input type="submit" value="insert 실행">
-        </form>
+            while(rs.next()){
+%>              <tr>
+<%              for(i=1 ; i<=cnt ; i++){
+%>                  <td><%=rs.getString(rsmd.getColumnName(i))%></td>
+<%              }
+%>              </tr>
+<%          }
+%>
+            </table><br><br><hr>
+            <h3><%=table%></h3>
+            <table border="1" cellpadding="3" cellspacing="2">
+<%
+            StringBuilder query = new StringBuilder("select * from " + table + " where ");
+            rs.beforeFirst();
+            while(rs.next()){
+                String name1 = rs.getString("TABLE_NAME");
+                String attr1 = rs.getString("COLUMN_NAME");
+                String name2 = rs.getString("REFERENCED_TABLE_NAME");
+                String attr2 = rs.getString("REFERENCED_COLUMN_NAME");
+                if (Arrays.asList(tables).contains(name2)){
+                    query.append(name1+"."+attr1+"="+name2+"."+attr2+"  and  ");
+                }
+            }
+            query.delete(query.length()-7, query.length());
+            query.append(";");
+            System.out.println(query);
+
+            rs = stmt.executeQuery(query.toString());
+            rsmd = rs.getMetaData();
+            cnt = rsmd.getColumnCount();
+            for(i=1 ; i<=cnt ; i++){
+%>              <th><%=rsmd.getColumnName(i)%></th>
+<%          }
+            while(rs.next()){
+%>              <tr>
+<%              for(i=1 ; i<=cnt ; i++){
+%>                  <td><%=rs.getString(rsmd.getColumnName(i))%></td>
+<%              }
+%>              </tr>
+<%          }
+%>
+            </table>
+            <h5>Insert, Update, Delete, Search는 Join을 선택하지 않아야 가능합니다.</h5>
+<%
+        } else {
+            String query;
+            String queryForMeta;
+            for (String table : tables){
+                queryForMeta = "select * from " + table + ";";
+                query = "select * from " + table;
+                if ("y".equals(request.getParameter("q"))){
+                    query += " where ";
+                }
+                Class.forName("org.mariadb.jdbc.Driver");
+                conn = DriverManager.getConnection(jdbcDriver, dbUser, dbPwd);
+                stmt = conn.createStatement();
+                rs = stmt.executeQuery(queryForMeta);
+                ResultSetMetaData rsmd = rs.getMetaData();
+                int cnt = rsmd.getColumnCount();
+                int i;
+                for(i=1 ; i<=cnt ; i++){
+                    if (request.getAttribute(rsmd.getColumnName(i)) != null){
+                        if (rsmd.getColumnType(i) == Types.VARCHAR) {
+                            query += rsmd.getColumnName(i) + "=\"" + request.getParameter(rsmd.getColumnName(i)) + "\" and ";
+                        } else {
+                            query += rsmd.getColumnName(i) + "=" + request.getParameter(rsmd.getColumnName(i)) + " and ";
+                        }
+                    }
+                }
+                if ("y".equals(request.getParameter("q"))){
+                    query = query.substring(0, query.length()-5);
+                }
+                query +=";";
+                System.out.println(query);
+                rs = stmt.executeQuery(query);
+%>              <h3><%=table%></h3>
+                <table border="1" cellpadding="3" cellspacing="2">
+<%                  for(i=1 ; i<=cnt ; i++){
+%>                      <th><%=rsmd.getColumnName(i)%></th>
+<%                  }
+                    while(rs.next()){
+%>                      <tr>
+<%                      for(i=1 ; i<=cnt ; i++){
+%>                          <td><%=rs.getString(rsmd.getColumnName(i))%></td>
+<%                      }
+%>                      </tr>
+<%                  }
+                String queryForCount = "select count(*) from " + table + ";";
+                rs = stmt.executeQuery(queryForCount);
+                rs.next();
+                String count = rs.getString("count(*)");
+%>
+                </table>
+
+                <form action="tableInsert.jsp" method="post">
+                    <br>
+                    <label>current table : <%=table.toString()%></label>
+                    <input type="hidden" name="table" value="<%=table.toString()%>">
+                    <br>
+<%                  for (i=1 ; i<=cnt ; i++){
+                        if (rsmd.getColumnName(i).equals("id")) {
+%>                          <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>" value="<%=count%>" disabled>
+                            <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>" value="<%=count%>" hidden>
+<%                      }
+                        else{
+%>                          <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>">
+<%                      }
+                    }
+%>              <br>
+                    <select name ="function">
+                        <option value="insert" selected>insert</option>
+                        <option value="update">update</option>
+                        <option value="delete">delete</option>
+                        <option value="search">search</option>
+                    </select>
+                    <input type="submit" value="실행">
+                    <h5>* delete는 id만 입력해도 가능합니다.</h5>
+                    <h5>* search는 원하는 데이터만 입력해도 가능합니다.</h5>
+                    <hr>
+                </form>
+<%          }
+        }
+%>
 <%
     }catch (Exception e) {
         e.printStackTrace();
@@ -121,8 +197,10 @@
             if (rs != null) rs.close();
         } catch (Exception e) {
             e.printStackTrace();
+            response.sendRedirect("adminPage.jsp?errorcode=1");
         }
     }
 %>
+<a href="adminPage.jsp">돌아가기</a>
 </body>
 </html>

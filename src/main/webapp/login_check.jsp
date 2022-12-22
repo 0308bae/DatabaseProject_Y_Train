@@ -34,18 +34,18 @@
             String role = rs.getString("role");
             if (role.equals("user")) {
                 session.setAttribute("id", id);
-                response.sendRedirect("login.jsp");
+                response.sendRedirect("index.jsp");
             }
             else { //if admin
                 response.sendRedirect("adminPage.jsp");
             }
         } else {
-            response.sendRedirect("login.jsp?errorcode=1");
+            response.sendRedirect("index.jsp?errorcode=1");
             // incorrect id or pw
         }
     } catch (Exception e) {
         e.printStackTrace();
-        response.sendRedirect("login.jsp?errorcode=2");
+        response.sendRedirect("index.jsp?errorcode=2");
         // unexpected error
     } finally {
         try {
