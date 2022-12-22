@@ -14,10 +14,13 @@
             if (request.getParameter("errorcode").equals("1")){
 %>              <h5>아이디 또는 패스워드가 잘못 입력되었습니다.</h5>
 <%          }
-else if (request.getParameter("errorcode").equals("2")){
+            else if (request.getParameter("errorcode").equals("2")){
 %>              <h5>알 수 없는 에러가 발생했습니다. 다시 시도해주세요.</h5>
 <%          }
-}
+            else if (request.getParameter("errorcode").equals("3")){
+%>              <h5>엔지니어로 등록되지 않은 사용자입니다. 관리자에게 문의하세요.</h5>
+<%          }
+        }
 %>
 <form action="login_check.jsp" method="post">
     아이디:<input type="text" name="id"><br/>
@@ -25,17 +28,14 @@ else if (request.getParameter("errorcode").equals("2")){
     <input type="submit" value="로그인"><br/>
 </form>
 <%  }
-else {
-    if (request.getParameter("errorcode") != null && request.getParameter("errorcode").equals("3")){
-%>          <h5>엔지니어로 등록되지 않은 사용자입니다. 관리자에게 문의하세요.</h5>
+    else {
+        if (session.getAttribute("id") == null){
+%>          <a href="login.jsp">로그인</a>
+<%      } else {
+%>          <h2>로그인 ID : <%=session.getAttribute("id")%></h2>
+            <a href="logout.jsp">로그아웃</a>
 <%      }
-else {
-    if (session.getAttribute("id") == null){
-%>      <a href="login.jsp">로그인</a>
-<%  } else {
-%>      <h2>로그인 ID : <%=session.getAttribute("id")%></h2>
-        <a href="logout.jsp">로그아웃</a>
-<%  }
+
     String jdbcDriver = "jdbc:mariadb://localhost:3306/ytrain_corp";
     String dbUser = "root";
     String dbPwd = "qjrjzld1!";
@@ -110,7 +110,6 @@ else { // 엔지니어로 등록되지 않은 사용자
     } catch (Exception e) {
         e.printStackTrace();
     }
-}
 }
 }
 %>

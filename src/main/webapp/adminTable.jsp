@@ -74,7 +74,25 @@
             <h3><%=table%></h3>
             <table border="1" cellpadding="3" cellspacing="2">
 <%
-            StringBuilder query = new StringBuilder("select * from " + table + " where ");
+            StringBuilder query = new StringBuilder("select ");
+
+            for (String t : tables){
+                String queryForMeta = "select * from " + t + ";";
+                Class.forName("org.mariadb.jdbc.Driver");
+                conn = DriverManager.getConnection(jdbcDriver, dbUser, dbPwd);
+                stmt = conn.createStatement();
+                rs = stmt.executeQuery(queryForMeta);
+                rsmd = rs.getMetaData();
+                cnt = rsmd.getColumnCount();
+                for(i=1 ; i<=cnt ; i++){
+                    query.append(t + "." + rsmd.getColumnName(i)+ " " + t+"_"+rsmd.getColumnName(i) + ", ");
+                }
+            }
+            query.delete(query.length()-2, query.length());
+            System.out.println(query);
+
+            query.append(" from " + table + " where ");
+            rs = stmt.executeQuery(foreignkey_query);
             rs.beforeFirst();
             while(rs.next()){
                 String name1 = rs.getString("TABLE_NAME");
@@ -92,13 +110,25 @@
             rs = stmt.executeQuery(query.toString());
             rsmd = rs.getMetaData();
             cnt = rsmd.getColumnCount();
+            String target = "";
+            Integer index = -1;
             for(i=1 ; i<=cnt ; i++){
-%>              <th><%=rsmd.getColumnName(i)%></th>
+                if (rsmd.getColumnName(i).equals("id")){
+                    index++;
+                    target=tables[index];
+                }
+%>              <th><%=target.charAt(0) + "_" + rsmd.getColumnName(i)%></th>
 <%          }
             while(rs.next()){
 %>              <tr>
-<%              for(i=1 ; i<=cnt ; i++){
-%>                  <td><%=rs.getString(rsmd.getColumnName(i))%></td>
+<%
+                index = -1;
+                for(i=1 ; i<=cnt ; i++){
+                    if (rsmd.getColumnName(i).equals("id")){
+                        index++;
+                        target=tables[index];
+                    }
+%>                  <td><%=rs.getString(target + "_" + rsmd.getColumnName(i))%></td>
 <%              }
 %>              </tr>
 <%          }
@@ -152,7 +182,7 @@
                 String queryForCount = "select count(*) from " + table + ";";
                 rs = stmt.executeQuery(queryForCount);
                 rs.next();
-                String count = rs.getString("count(*)");
+                Integer count = rs.getInt("count(*)");
 %>
                 </table>
 
@@ -163,8 +193,7 @@
                     <br>
 <%                  for (i=1 ; i<=cnt ; i++){
                         if (rsmd.getColumnName(i).equals("id")) {
-%>                          <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>" value="<%=count%>" disabled>
-                            <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>" value="<%=count%>" hidden>
+%>                          <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>" value="<%=count+1%>">
 <%                      }
                         else{
 %>                          <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>">

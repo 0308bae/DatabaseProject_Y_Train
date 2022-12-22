@@ -62,14 +62,27 @@
             queryForUpdate.append(" where " + rsmd.getColumnName(1) + "=" + (request.getParameter(rsmd.getColumnName(1))));
             queryForUpdate.append(";");
             stmt.executeUpdate(queryForUpdate.toString());
+            if (request.getParameter("u") != null && request.getParameter("u").equals("y")){
+                request.getRequestDispatcher("userTable.jsp").forward(request, response);
+            }
+            else{
+                request.getRequestDispatcher("adminTable.jsp").forward(request, response);
+            }
         } else if("delete".equals(function)){
             StringBuilder queryForDelete = new StringBuilder("delete from " + table + " where id=");
             queryForDelete.append(request.getParameter("id") + ";");
+            System.out.println(queryForDelete.toString());
             stmt.executeUpdate(queryForDelete.toString());
+            if (request.getParameter("u") != null && request.getParameter("u").equals("y")){
+                request.getRequestDispatcher("userTable.jsp").forward(request, response);
+            }
+            else{
+                request.getRequestDispatcher("adminTable.jsp").forward(request, response);
+            }
         } else if("search".equals(function)){
             request.setAttribute("table", table);
             int cnt = rsmd.getColumnCount();
-            for (int i = 1; i <= cnt; i++){
+            for (int i = 2; i <= cnt; i++){
                 if (request.getParameter(rsmd.getColumnName(i)) != null && !request.getParameter(rsmd.getColumnName(i)).equals("")){
                     request.setAttribute(rsmd.getColumnName(i), request.getParameter(rsmd.getColumnName(i)));
                 }
@@ -78,11 +91,21 @@
         }
     }catch (SQLIntegrityConstraintViolationException e) {
         e.printStackTrace();
-        response.sendRedirect("adminPage.jsp?errorcode=2");
+        if (request.getParameter("u") != null && request.getParameter("u").equals("y")){
+            response.sendRedirect("userTable.jsp?errorcode=2");
+        }
+        else{
+            response.sendRedirect("adminPage.jsp?errorcode=2");
+        }
         // foreign key error
     }catch (Exception e) {
         e.printStackTrace();
-        response.sendRedirect("adminPage.jsp?errorcode=1");
+        if (request.getParameter("u") != null && request.getParameter("u").equals("y")){
+            response.sendRedirect("userTable.jsp?errorcode=1");
+        }
+        else{
+            response.sendRedirect("adminPage.jsp?errorcode=1");
+        }
         // unexpected error
     } finally {
         try {
@@ -91,7 +114,12 @@
             if (rs != null) rs.close();
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("adminPage.jsp?errorcode=1");
+            if (request.getParameter("u") != null && request.getParameter("u").equals("y")){
+                response.sendRedirect("userTable.jsp?errorcode=1");
+            }
+            else{
+                response.sendRedirect("adminPage.jsp?errorcode=1");
+            }
         }
     }
 %>

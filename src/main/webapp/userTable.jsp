@@ -8,7 +8,11 @@
 <body>
 
 <%
-
+    if (request.getParameter("errorcode") != null && request.getParameter("errorcode").equals("1")){
+%>      <h5>잘못된 사용입니다.</h5>
+<%  } else if (request.getParameter("errorcode") != null && request.getParameter("errorcode").equals("2")){
+%>      <h5>외래키 정책 위반.</h5>
+<%  }
     request.setCharacterEncoding("UTF-8");
 
     String jdbcDriver = "jdbc:mariadb://localhost:3306/ytrain_corp";
@@ -71,7 +75,7 @@
             String queryForCount = "select count(*) from operation where engineer_id=\"" + ID +"\";";
             rs = stmt.executeQuery(queryForCount);
             rs.next();
-            String count = rs.getString("count(*)");
+            Integer count = rs.getInt("count(*)");
             queryForMeta = "select * from operation where engineer_id=\"" + ID +"\";";
 
             rs = stmt.executeQuery(queryForMeta);
@@ -79,8 +83,7 @@
             int cnt = rsmd.getColumnCount();
             for (int i=1 ; i<=cnt ; i++){
                 if (rsmd.getColumnName(i).equals("id")) {
-%>                  <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>" value="<%=count%>" disabled>
-                    <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>" value="<%=count%>" hidden>
+%>                  <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>" value="<%=count+1%>">
 <%              }
                 else if (rsmd.getColumnName(i).equals("updatetime")) {
 %>                  <input type="text" name="<%=rsmd.getColumnName(i)%>" placeholder="<%=rsmd.getColumnName(i)%>" value="<%=LocalDateTime.now()%>" disabled>

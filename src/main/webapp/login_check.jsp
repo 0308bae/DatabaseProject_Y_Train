@@ -37,6 +37,7 @@
                 response.sendRedirect("index.jsp");
             }
             else { //if admin
+                session.setAttribute("id", id);
                 response.sendRedirect("adminPage.jsp");
             }
         } else {

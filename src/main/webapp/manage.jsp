@@ -2,10 +2,9 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-    <title>Project Homework #7</title>
+    <title>Title</title>
 </head>
 <body>
-<h2>2018253070 배재익</h2>
 <%
     String jdbcDriver = "jdbc:mariadb://localhost:3306/ytrain_corp";
     String dbUser = "root";
@@ -99,6 +98,6 @@
     }
 %>
 </p><br><br>
-<a href="index.jsp">돌아가기</a>
+<a href="adminPage.jsp">돌아가기</a>
 </body>
 </html>
